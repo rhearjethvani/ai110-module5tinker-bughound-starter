@@ -62,6 +62,11 @@ def assess_risk(
         score -= 5
         reasons.append("Bare except was modified, verify correctness.")
 
+    added_lines = len(fixed_lines) - len(original_lines)
+    if added_lines > 12:
+        score -= 15
+        reasons.append("Large line count increase; possible over-edit.")
+
     # ----------------------------
     # Clamp score
     # ----------------------------

@@ -46,3 +46,16 @@ def test_missing_return_is_penalized():
     )
     assert risk["score"] < 100
     assert any("Return" in r or "return" in r for r in risk["reasons"])
+
+
+def test_large_line_increase_penalizes_score():
+    original = "def f():\n    return 1\n"
+    # Use non-blank lines so strip() does not erase the size growth we need.
+    fixed = original + "".join(f"# pad {i}\n" for i in range(20))
+    risk = assess_risk(
+        original_code=original,
+        fixed_code=fixed,
+        issues=[{"type": "Code Quality", "severity": "Low", "msg": "minor"}],
+    )
+    assert any("Large line count increase" in r for r in risk["reasons"])
+    assert risk["score"] < 100
