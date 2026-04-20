@@ -76,10 +76,18 @@ class BugHoundAgent:
             self._log("ANALYZE", f"API Error: {str(e)}. Falling back to heuristics.")
             return self._heuristic_analyze(code_snippet)
 
+        if raw is None or not str(raw).strip():
+            self._log("ANALYZE", "LLM returned empty analyzer output. Falling back to heuristics.")
+            return self._heuristic_analyze(code_snippet)
+
         issues = self._parse_json_array_of_issues(raw)
 
         if issues is None:
             self._log("ANALYZE", "LLM output was not parseable JSON. Falling back to heuristics.")
+            return self._heuristic_analyze(code_snippet)
+
+        if issues and all(not str(i.get("msg", "")).strip() for i in issues):
+            self._log("ANALYZE", "LLM issues were missing usable messages. Falling back to heuristics.")
             return self._heuristic_analyze(code_snippet)
 
         return issues
