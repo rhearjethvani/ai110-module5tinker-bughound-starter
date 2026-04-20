@@ -87,6 +87,12 @@ def assess_risk(
     # ----------------------------
     should_autofix = level == "low"
 
+    if original_code.strip() == fixed_code.strip() and issues:
+        should_autofix = False
+        note = "No code change despite reported issues; human review required."
+        if note not in reasons:
+            reasons.append(note)
+
     if not reasons:
         reasons.append("No significant risks detected.")
 

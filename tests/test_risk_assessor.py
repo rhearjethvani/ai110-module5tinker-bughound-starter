@@ -48,6 +48,17 @@ def test_missing_return_is_penalized():
     assert any("Return" in r or "return" in r for r in risk["reasons"])
 
 
+def test_no_code_change_blocks_autofix():
+    code = "def f():\n    return 1\n"
+    risk = assess_risk(
+        original_code=code,
+        fixed_code=code,
+        issues=[{"type": "Code Quality", "severity": "Low", "msg": "note"}],
+    )
+    assert risk["should_autofix"] is False
+    assert any("No code change despite" in r for r in risk["reasons"])
+
+
 def test_large_line_increase_penalizes_score():
     original = "def f():\n    return 1\n"
     # Use non-blank lines so strip() does not erase the size growth we need.
